@@ -39,6 +39,8 @@ public class UserRegisterService {
 	private static final String USER_NOT_FOUND_OR_DISABLED = "User doesnt exist or is already disabled";
 	private static final String USER_NOT_FOUND = "User doesnt exist";
 	private static final String ERROR_DELETING_USER = "Error Deleting User";
+	
+	
 
 
 	public Mono<Response> createUser(@Valid UserRegisterDTO userRegisterDTO) {
@@ -114,20 +116,25 @@ public class UserRegisterService {
 	
 	
 	private boolean validateEmail(String email) {
+		
+		if(email.length() > 40)
+			return false;
 		Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(email);
         return matcher.find();
 	}
 
 	private boolean validatePhone(String phone) {
+		
+		
 		if(phone.length() != 10)
 			return false;
 		return true;
 	}
 
 
-
 	private boolean validatePassword(String password) {
-		
+		if(password.length() > 24)
+			return false;
 		return password.matches(PaswordValidationRegex);
 
 	}
@@ -189,7 +196,7 @@ public class UserRegisterService {
 		        	return userRepository.save(user).switchIfEmpty(Mono.error(new Exception(ERROR_DELETING_USER)))
 		    		        .flatMap(deletedUser -> {
 		    		        		
-		    					Response res =Response.builder().status(true).message("Ok").data(deletedUser.getId()).build();
+		    					Response res =Response.builder().status(true).message("Ok").data(deletedUser.getId().toString()).build();
 		    					log.endTransaction(res);
 		    					return Mono.just(res);
 		    		        	
@@ -219,7 +226,7 @@ public class UserRegisterService {
 		        	
 		        	return Mono.just(Response
 		        			.builder()
-		        			.data(user)
+		        			.data(mapEntityToDTO(user))
 		        			.status(true)
 		        			.message("Ok")
 		        			.build());
@@ -248,7 +255,7 @@ public class UserRegisterService {
 				Response res = Response.builder()
                 		.status(true)
                 		.message("OK")
-                		.data(users)
+                		.data(mapListToListDTO((ArrayList<User>)users))
                         .build();
 				log.endTransaction(res);
 				return Mono.just(res);
@@ -273,12 +280,28 @@ public class UserRegisterService {
 		
 		
 		return RegisteredUserDTO.builder()
-				.id(user.toString())
+				.id(user.getId().toString())
 				.email(user.getEmail())
 				.username(user.getUsername())
+				.cellphone(user.getCellphone())
+				.password(user.getPassword())
 				.build();
 		
 	}
+	
+	private ArrayList<RegisteredUserDTO> mapListToListDTO(ArrayList<User> users){
+		
+		ArrayList<RegisteredUserDTO> usersDTO = new ArrayList<>();
+		for(User user : users) {
+			usersDTO.add(mapEntityToDTO(user));
+		}
+		
+		return usersDTO;
+		
+	}
+	
+
+	 
 	
 	
 	//El pingolin

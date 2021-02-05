@@ -14,7 +14,7 @@
 	<name>imd-register</name>
 	<description>Microservicio para hacer register de un usuario imd</description>
 	<properties>
-		<java.version>15</java.version>
+		<java.version>14</java.version>
 	</properties>
 	<dependencies>
 		<!-- dependency>
